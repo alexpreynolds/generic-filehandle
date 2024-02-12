@@ -6,9 +6,11 @@ import {
   Fetcher,
   PolyfilledResponse,
 } from './filehandle'
+import { encode } from 'base-64'
 
 export default class RemoteFile implements GenericFilehandle {
   protected url: string
+  protected auth: any = {}
   private _stat?: Stats
   private fetchImplementation: Fetcher
   private baseOverrides: any = {}
@@ -30,6 +32,7 @@ export default class RemoteFile implements GenericFilehandle {
 
   public constructor(source: string, opts: FilehandleOptions = {}) {
     this.url = source
+    this.auth = opts.auth || {}
     const fetch = opts.fetch || globalThis.fetch.bind(globalThis)
     if (!fetch) {
       throw new TypeError(
@@ -82,6 +85,9 @@ export default class RemoteFile implements GenericFilehandle {
     } else if (length === Infinity && position !== 0) {
       headers.range = `bytes=${position}-`
     }
+    if (this.auth && this.auth.user && this.auth.password) {
+      headers.Authorization = `Basic ${encode(this.auth.user + ":" + this.auth.password)}`
+    }
     const args = {
       ...this.baseOverrides,
       ...overrides,
@@ -129,6 +135,10 @@ export default class RemoteFile implements GenericFilehandle {
       throw new Error('${this.url} fetch returned status 200, expected 206')
     }
 
+    if (response.status === 404) {
+      return { bytesRead: 0, buffer }
+    }
+
     // TODO: try harder here to gather more information about what the problem is
     throw new Error(`HTTP ${response.status} fetching ${this.url}`)
   }
@@ -160,6 +170,9 @@ export default class RemoteFile implements GenericFilehandle {
       delete opts.encoding
     }
     const { headers = {}, signal, overrides = {} } = opts
+    if (this.auth && this.auth.user && this.auth.password) {
+      headers.Authorization = `Basic ${encode(this.auth.user + ":" + this.auth.password)}`
+    }
     const args = {
       headers,
       method: 'GET',
@@ -173,6 +186,10 @@ export default class RemoteFile implements GenericFilehandle {
 
     if (!response) {
       throw new Error('generic-filehandle failed to fetch')
+    }
+
+    if (response.status === 404) {
+      return Buffer.alloc(1);
     }
 
     if (response.status !== 200) {

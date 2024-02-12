@@ -19,6 +19,7 @@ export interface FilehandleOptions {
    */
   signal?: AbortSignal
   headers?: any
+  auth?: any
   overrides?: any
   encoding?: BufferEncoding
   /**
