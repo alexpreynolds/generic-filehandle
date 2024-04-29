@@ -98,7 +98,7 @@ export default class RemoteFile implements GenericFilehandle {
       },
       method: 'GET',
       redirect: 'follow',
-      mode: 'no-cors',
+      mode: 'cors',
       signal,
     }
     const response = await this.fetch(this.url, args)
@@ -177,11 +177,12 @@ export default class RemoteFile implements GenericFilehandle {
       headers,
       method: 'GET',
       redirect: 'follow',
-      mode: 'no-cors',
+      mode: 'cors',
       signal,
       ...this.baseOverrides,
       ...overrides,
     }
+    console.log(`headers: ${JSON.stringify(headers)}`)
     const response = await this.fetch(this.url, args)
 
     if (!response) {
