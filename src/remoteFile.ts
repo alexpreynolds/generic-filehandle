@@ -182,7 +182,6 @@ export default class RemoteFile implements GenericFilehandle {
       ...this.baseOverrides,
       ...overrides,
     }
-    console.log(`headers: ${JSON.stringify(headers)}`)
     const response = await this.fetch(this.url, args)
 
     if (!response) {
