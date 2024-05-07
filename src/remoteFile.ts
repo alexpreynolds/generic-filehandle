@@ -96,9 +96,6 @@ export default class RemoteFile implements GenericFilehandle {
     } else if (length === Infinity && position !== 0) {
       headers.range = `bytes=${position}-`
     }
-    if (this.auth && this.auth.user && this.auth.password) {
-      headers.Authorization = `Basic ${encode(this.auth.user + ":" + this.auth.password)}`
-    }
     const args = {
       ...this.baseOverrides,
       ...overrides,
@@ -111,6 +108,10 @@ export default class RemoteFile implements GenericFilehandle {
       redirect: 'follow',
       mode: 'cors',
       signal,
+    }
+    if (this.auth && this.auth.user && this.auth.password) {
+      headers.Authorization = `Basic ${encode(this.auth.user + ":" + this.auth.password)}`
+      args.credentials = 'include'
     }
     const response = await this.fetch(this.url, args)
 
@@ -181,10 +182,6 @@ export default class RemoteFile implements GenericFilehandle {
       delete opts.encoding
     }
     const { headers = {}, signal, overrides = {} } = opts
-    // console.log(`[generic-filehandle] [readFile] this.auth ${JSON.stringify(this.auth)}`)
-    if (this.auth && this.auth.user && this.auth.password) {
-      headers.Authorization = `Basic ${encode(this.auth.user + ":" + this.auth.password)}`
-    }
     // console.log(`[generic-filehandle] [readFile] headers ${JSON.stringify(headers)}`)
     const args = {
       headers,
@@ -194,6 +191,11 @@ export default class RemoteFile implements GenericFilehandle {
       signal,
       ...this.baseOverrides,
       ...overrides,
+    }
+    // console.log(`[generic-filehandle] [readFile] this.auth ${JSON.stringify(this.auth)}`)
+    if (this.auth && this.auth.user && this.auth.password) {
+      headers.Authorization = `Basic ${encode(this.auth.user + ":" + this.auth.password)}`
+      args.credentials = 'include'
     }
     const response = await this.fetch(this.url, args)
 
