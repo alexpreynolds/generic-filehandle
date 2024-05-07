@@ -75,6 +75,7 @@ export default class RemoteFile implements GenericFilehandle {
           ...init,
           // headers: headers,
           cache: 'reload',
+          credentials: 'include',
         })
       } else {
         throw e
