@@ -43,6 +43,7 @@ export default class RemoteFile implements GenericFilehandle {
       this.baseOverrides = opts.overrides
     }
     this.fetchImplementation = fetch
+    // console.log(`[generic-filehandle] [constructor] this.auth ${JSON.stringify(this.auth)}`)
   }
 
   public async fetch(
@@ -50,8 +51,16 @@ export default class RemoteFile implements GenericFilehandle {
     init: RequestInit | undefined,
   ): Promise<PolyfilledResponse> {
     let response
+    // const headers: any = {}
+    // if (this.auth && this.auth.user && this.auth.password) {
+    //   headers.Authorization = `Basic ${encode(this.auth.user + ":" + this.auth.password)}`
+    // }
     try {
-      response = await this.fetchImplementation(input, init)
+      // console.log(`[generic-filehandle] [fetch (try)] headers ${JSON.stringify(headers)}`)
+      response = await this.fetchImplementation(input, {
+        ...init,
+        // headers: headers,
+      })
     } catch (e) {
       if (`${e}`.includes('Failed to fetch')) {
         // refetch to to help work around a chrome bug (discussed in
@@ -61,8 +70,10 @@ export default class RemoteFile implements GenericFilehandle {
         console.warn(
           `generic-filehandle: refetching ${input} to attempt to work around chrome CORS header caching bug`,
         )
+        // console.log(`[generic-filehandle] [fetch (catch)] headers ${JSON.stringify(headers)}`)
         response = await this.fetchImplementation(input, {
           ...init,
+          // headers: headers,
           cache: 'reload',
         })
       } else {
@@ -170,9 +181,11 @@ export default class RemoteFile implements GenericFilehandle {
       delete opts.encoding
     }
     const { headers = {}, signal, overrides = {} } = opts
+    // console.log(`[generic-filehandle] [readFile] this.auth ${JSON.stringify(this.auth)}`)
     if (this.auth && this.auth.user && this.auth.password) {
       headers.Authorization = `Basic ${encode(this.auth.user + ":" + this.auth.password)}`
     }
+    // console.log(`[generic-filehandle] [readFile] headers ${JSON.stringify(headers)}`)
     const args = {
       headers,
       method: 'GET',
