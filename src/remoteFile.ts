@@ -57,9 +57,14 @@ export default class RemoteFile implements GenericFilehandle {
     // }
     try {
       // console.log(`[generic-filehandle] [fetch (try)] headers ${JSON.stringify(headers)}`)
+      if (this.auth && this.auth.user && this.auth.password) {
+        init = init || {}
+        init.credentials = 'include'
+        init.headers = {}
+        init.headers.Authorization = `Basic ${encode(this.auth.user + ":" + this.auth.password)}`
+      }
       response = await this.fetchImplementation(input, {
         ...init,
-        credentials: 'include',
         // headers: headers,
       })
     } catch (e) {
@@ -72,11 +77,16 @@ export default class RemoteFile implements GenericFilehandle {
           `generic-filehandle: refetching ${input} to attempt to work around chrome CORS header caching bug`,
         )
         // console.log(`[generic-filehandle] [fetch (catch)] headers ${JSON.stringify(headers)}`)
+        if (init && this.auth && this.auth.user && this.auth.password) {
+          init = init || {}
+          init.credentials = 'include'
+          init.headers = {}
+          init.headers.Authorization = `Basic ${encode(this.auth.user + ":" + this.auth.password)}`
+        }
         response = await this.fetchImplementation(input, {
           ...init,
           // headers: headers,
           cache: 'reload',
-          credentials: 'include',
         })
       } else {
         throw e
