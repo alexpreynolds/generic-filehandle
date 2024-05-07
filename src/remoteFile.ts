@@ -59,6 +59,7 @@ export default class RemoteFile implements GenericFilehandle {
       // console.log(`[generic-filehandle] [fetch (try)] headers ${JSON.stringify(headers)}`)
       response = await this.fetchImplementation(input, {
         ...init,
+        credentials: 'include',
         // headers: headers,
       })
     } catch (e) {
@@ -197,6 +198,7 @@ export default class RemoteFile implements GenericFilehandle {
     if (this.auth && this.auth.user && this.auth.password) {
       headers.Authorization = `Basic ${encode(this.auth.user + ":" + this.auth.password)}`
       args.credentials = 'include'
+      console.log(`[generic-filehandle] [readFile] args ${JSON.stringify(args)}`)
     }
     const response = await this.fetch(this.url, args)
 
